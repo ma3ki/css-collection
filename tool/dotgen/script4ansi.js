@@ -6,8 +6,8 @@ class DotGen {
   constructor(grid) {
     this.mode = "paint";
     this.color = "#FF0000";
-    this.size = 8;
-    this.pixel = 10;
+    this.columns = 8;
+    this.rows = 8;
     this.grid = grid;
 
     this.resetEventListner();
@@ -30,40 +30,27 @@ class DotGen {
   }
 
   /**
-   * 1ドットあたりのピクセル数を変更する
-   * @param {number} pixel
-   */
-  changePixel(pixel) {
-    this.pixel = pixel || 10;
-  }
-
-  /**
    * グリッドサイズを変更する
-   * @param {number} size
+   * @param {string} {number} 
    */
-  changeSize(size) {
-    this.size = size || 8;
+  changeSize() {
 
     Array.from(this.grid.querySelectorAll("div")).forEach(el => {
       this.removeChild(el);
     });
 
-    [...Array(size ** 2)].forEach(i => {
+    [...Array(columns.value * rows.value)].forEach(i => {
       const div = document.createElement("div");
       this.grid.appendChild(div);
     });
 
     this.resetEventListner();
-/**
-*    this.grid.style.gridTemplateColumns = this.grid.style.gridTemplateRows = "1fr ".repeat(
-*      size
-*    );
-*/
+
     this.grid.style.gridTemplateColumns = "1fr ".repeat(
-      size
+      columns.value
     );
     this.grid.style.gridTemplateRows = "1fr ".repeat(
-      size
+      rows.value
     );
   }
 
@@ -90,8 +77,16 @@ class DotGen {
    * @param {HTMLElement} el
    */
   draw(el) {
-    el.style.backgroundColor =
-      this.mode === "paint" ? this.color : "transparent";
+    const red = parseInt(this.color.substring(1,3),16);
+    const green = parseInt(this.color.substring(3,5),16);
+    const blue = parseInt(this.color.substring(5,7),16);
+
+    if (el.style.backgroundColor === "rgb(" + red + ", " + green + ", " + blue + ")" ) {
+      el.style.backgroundColor = "transparent"
+    } else {
+      el.style.backgroundColor =
+        this.mode === "paint" ? this.color : "transparent";
+    }
 
     console.log(this.output());
   }
@@ -132,7 +127,7 @@ class DotGen {
     const result = (function() { 
       var code = 'echo -e "';
       boxShadows.forEach(function(value, index) {
-        if ( ( index + 1 ) % size.value === 0 ) {
+        if ( ( index + 1 ) % columns.value === 0 ) {
           code += value + "\\033[0;0m \n" ;
         } else {
           code += value ;
@@ -150,15 +145,14 @@ const main = () => {
   const grid = document.querySelector(".dot-grid");
   const dotGen = new DotGen(grid);
 
-  dotGen.changeSize(8);
-  dotGen.changePixel(4);
+  dotGen.changeSize();
 
-  document.getElementById("size").addEventListener("change", e => {
-    dotGen.changeSize(parseInt(e.target.value, 10));
+  document.getElementById("columns").addEventListener("change", e => {
+    dotGen.changeSize();
   });
 
-  document.getElementById("pixel").addEventListener("change", e => {
-    dotGen.changePixel(parseInt(e.target.value, 10));
+  document.getElementById("rows").addEventListener("change", e => {
+    dotGen.changeSize();
   });
 
   document.getElementById("color").addEventListener("change", e => {
